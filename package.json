@@ -19,5 +19,15 @@
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",
 		"vite": "^6.0.0"
+	},
+	"dependencies": {
+		"@react-three/drei": "^9.121.5",
+		"@react-three/fiber": "^8.17.14",
+		"d3": "^7.9.0",
+		"d3-array": "^3.2.4",
+		"d3-fetch": "^3.0.1",
+		"d3-geo": "^3.1.1",
+		"three": "^0.173.0",
+		"three-geojson-loader": "^1.0.0"
 	}
 }
