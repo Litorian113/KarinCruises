@@ -15,30 +15,32 @@
   //
   // A) DATUMSVERARBEITUNG
   //
-
-  // Heutiges Datum (auf 0 Uhr gesetzt)
   let today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Hilfsfunktion zum Parsen eines "DD.MM.YYYY"-Strings in ein Date-Objekt
+  // Hilfsfunktion: DD.MM.YYYY → Date
   function parseDDMMYYYY(dateString) {
-    // Beispiel: "11.02.2025"
     const [day, month, year] = dateString.split(".");
-    return new Date(+year, +month - 1, +day); 
+    return new Date(+year, +month - 1, +day);
   }
 
-  // Prüft, ob dateString (DD.MM.YYYY) <= heute
+  // Prüft, ob dateString <= heute
   function isPastOrToday(dateString) {
     const d = parseDDMMYYYY(dateString);
     d.setHours(0, 0, 0, 0);
     return d <= today;
   }
 
-  // Sortiere die Daten nach Datum aufsteigend
-  // UND filtern wir gleich die Einträge raus, die atSea=true ODER lat/lon=null
+  // Prüft, ob dateString == heute (Tagesgenau)
+  function isToday(dateString) {
+    const d = parseDDMMYYYY(dateString);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() === today.getTime();
+  }
+
+  // Daten sortieren & atSea / null filtern
   const sortedData = [...data]
     .filter((entry) => {
-      // atSea-Datensätze oder latitude/longitude=null weglassen
       if (entry.atSea === true) return false;
       if (entry.latitude === null || entry.longitude === null) return false;
       return true;
@@ -50,8 +52,6 @@
   //
   // B) 3D-HILFSFUNKTIONEN
   //
-
-  // Wandelt Breitengrad (lat) + Längengrad (lon) in 3D-Koordinaten auf einer Kugel um
   function latLonToCartesian(lat, lon, radius) {
     const phi = (90 - lat) * (Math.PI / 180);
     const theta = (lon + 180) * (Math.PI / 180);
@@ -61,7 +61,6 @@
     return new THREE.Vector3(x, y, z);
   }
 
-  // Manuelle Slerp-Funktion für Vector3
   function slerpVec3(a, b, t) {
     let dot = a.dot(b);
     dot = Math.min(Math.max(dot, -1), 1);
@@ -74,51 +73,33 @@
              .add(relative.multiplyScalar(Math.sin(theta)));
   }
 
-  /**
-   * Erzeugt einen Großkreis-Bogen zwischen startPos und endPos
-   * mit zusätzlicher "extraHeight", sodass die Mitte merklich über der Kugel schwebt.
-   *
-   * @param {THREE.Vector3} startPos - 3D-Koordinate des Startpunktes (Radius ~ 1.005)
-   * @param {THREE.Vector3} endPos - 3D-Koordinate des Endpunktes
-   * @param {number} segments - Anzahl Segmente (z.B. 64)
-   * @param {number} extraHeight - maximale Höhe über dem normalen Radius (z.B. 0.05)
-   */
   function createArc(startPos, endPos, segments = 32, extraHeight = 0.05) {
     const vStart = startPos.clone().normalize();
     const vEnd   = endPos.clone().normalize();
 
     const rA = startPos.length();
     const rB = endPos.length();
-    // Durchschnittlicher Basis-Radius
     const avgRadius = (rA + rB) / 2;
 
     const arcPoints = [];
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
-      // Slerp auf Einheitskugel
       let v = slerpVec3(vStart, vEnd, t);
 
-      // Nun "Wölbung": in der Mitte (t=0.5) am höchsten, via sin(π * t)
-      // => sin(0) = 0, sin(π) = 0, sin(π/2)=1
       const arcFactor = Math.sin(Math.PI * t);
-      // Extrapolierte Höhe
       const addedHeight = extraHeight * arcFactor;
 
-      // Mit (Basis-Radius + addedHeight) skalieren
       v.multiplyScalar(avgRadius + addedHeight);
-
       arcPoints.push(v);
     }
     return arcPoints;
   }
 
   //
-  // C) onMount SVELTE
+  // C) onMount
   //
   onMount(() => {
-    //
     // 1) Szene, Kamera, Renderer
-    //
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000106);
 
@@ -135,9 +116,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    //
-    // 2) Post-Processing (Bloom)
-    //
+    // 2) Bloom
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
@@ -150,9 +129,7 @@
     );
     composer.addPass(bloomPass);
 
-    //
     // 3) Licht
-    //
     const ambientLight = new THREE.AmbientLight(0x4C65B9, 0.8);
     scene.add(ambientLight);
 
@@ -164,9 +141,7 @@
     pointLightLeft.position.set(-2, -2, 2);
     scene.add(pointLightLeft);
 
-    //
     // 4) Globus
-    //
     const globeGeometry = new THREE.SphereGeometry(1, 64, 64);
     const globeMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x171a26,
@@ -176,22 +151,27 @@
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
     scene.add(globe);
 
-    //
     // 5) OrbitControls
-    //
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    //
-    // 6) Punkte platzieren (Marker)
-    //    - Weiß + Glow, wenn Datum <= heute; Grau sonst.
-    //
+    // 6) Punkte platzieren
     sortedData.forEach((entry) => {
       const { latitude, longitude, date } = entry;
-      const isPast = isPastOrToday(date);
+      const pastOrToday = isPastOrToday(date);
+      const exactlyToday = isToday(date);
 
-      // Hauptfarbe: Weiß (Vergangenheit) oder Grau (Zukunft)
-      const color = isPast ? 0xffffff : 0x777777;
+      // Farbe: 
+      // - Gelb (heute), 
+      // - Weiß (Vergangenheit), 
+      // - Grau (Zukunft)
+      let color = 0x777777; // Default = Grau (Zukunft)
+      if (pastOrToday) {
+        color = 0xffffff;   // Weiß
+      }
+      if (exactlyToday) {
+        color = 0xffff00;   // Gelb
+      }
 
       // Kleiner Haupt-Marker
       const markerGeometry = new THREE.SphereGeometry(0.003, 16, 16);
@@ -201,13 +181,14 @@
       marker.position.copy(latLonToCartesian(latitude, longitude, 1.02));
       scene.add(marker);
 
-      // Falls vergangen/aktuell → leuchtenden Glow-Punkt hinzufügen
-      if (isPast) {
+      // Falls vergangen ODER heute => Glow-Punkt
+      // (je nach Geschmack könntest du "heute" auch stärker leuchten lassen)
+      if (pastOrToday || exactlyToday) {
         const glowGeometry = new THREE.SphereGeometry(0.006, 16, 16); 
         const glowMaterial = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
+          color,          // gleiche Farbe
           transparent: true,
-          opacity: 1,
+          opacity: 1,     // intensiver Glow
         });
         const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
         glowSphere.position.copy(marker.position);
@@ -215,37 +196,30 @@
       }
     });
 
-    //
-// 7) Route (Linien) zwischen aufeinanderfolgenden Datenpunkten
-for (let i = 0; i < sortedData.length - 1; i++) {
-  const curr = sortedData[i];
-  const next = sortedData[i + 1];
+    // 7) Routenlinien
+    for (let i = 0; i < sortedData.length - 1; i++) {
+      const curr = sortedData[i];
+      const next = sortedData[i + 1];
 
-  // Falls das Zieldatum (next) noch in der Zukunft liegt, 
-  // dann skippen wir das Zeichnen der Linie.
-  if (!isPastOrToday(next.date)) {
-    continue;
-  }
+      // Falls das Zieldatum (next) noch in der Zukunft liegt, => skip
+      if (!isPastOrToday(next.date)) {
+        continue;
+      }
 
-  // Start / End
-  const startPos = latLonToCartesian(curr.latitude, curr.longitude, 1.005);
-  const endPos   = latLonToCartesian(next.latitude, next.longitude, 1.005);
+      const startPos = latLonToCartesian(curr.latitude, curr.longitude, 1.005);
+      const endPos   = latLonToCartesian(next.latitude, next.longitude, 1.005);
 
-  // Erzeuge Slerp-Punkte (Großkreis) + Aufwölbung
-  const arcPoints = createArc(startPos, endPos, 64, 0.05);
-  const geometry  = new THREE.BufferGeometry().setFromPoints(arcPoints);
+      // Bogen
+      const arcPoints = createArc(startPos, endPos, 64, 0.05);
+      const geometry  = new THREE.BufferGeometry().setFromPoints(arcPoints);
 
-  // Linienfarbe: Weiß, da es ja Vergangenheit/Heute ist (bereits erreicht)
-  const routeColor = 0xffffff;
-  const routeMat   = new THREE.LineBasicMaterial({ color: routeColor, linewidth: 2 });
+      // Linienfarbe: Weiß
+      const routeMat   = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+      const routeLine = new THREE.Line(geometry, routeMat);
+      scene.add(routeLine);
+    }
 
-  const routeLine = new THREE.Line(geometry, routeMat);
-  scene.add(routeLine);
-}
-
-    //
     // 8) Ländergrenzen
-    //
     fetch("/world.json")
       .then((res) => res.json())
       .then((geojson) => {
@@ -311,16 +285,12 @@ for (let i = 0; i < sortedData.length - 1; i++) {
       });
     }
 
-    //
-    // 9) Klick-Event: Umschalten der Auto-Rotation
-    //
+    // 9) Auto-Rotation Toggle
     container.addEventListener("click", () => {
       autoRotate = !autoRotate;
     });
 
-    //
-    // 10) Animationsschleife
-    //
+    // 10) Animation
     function animate() {
       requestAnimationFrame(animate);
       if (autoRotate) {
@@ -331,9 +301,7 @@ for (let i = 0; i < sortedData.length - 1; i++) {
     }
     animate();
 
-    //
-    // 11) Fenster-Resize
-    //
+    // 11) Resize
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();

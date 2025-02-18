@@ -1,4 +1,4 @@
-let data = 
+export const data = 
     [
         {
           "date": "11.02.2025",
