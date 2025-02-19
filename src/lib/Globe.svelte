@@ -108,7 +108,7 @@
     composer.addPass(bloomPass);
 
     // Licht
-    const ambientLight = new THREE.AmbientLight(0x4C65B9, 0.8);
+    const ambientLight = new THREE.AmbientLight(0x4C65B9, 0.9);
     scene.add(ambientLight);
 
     const pointLight = new THREE.PointLight(0xffffff, 12, 4);
@@ -122,7 +122,7 @@
     // Globus
     const globeGeometry = new THREE.SphereGeometry(1, 64, 64);
     const globeMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x171a26,
+      color: 0x282D42,
       transparent: false,
     });
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
