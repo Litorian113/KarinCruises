@@ -4,6 +4,7 @@
     import Nav from "$lib/Nav.svelte";
     import Globe from "../lib/Globe.svelte";
     import Cocktail from "$lib/Cocktail.svelte";
+    import DailyMessage from "$lib/DailyMessage.svelte";
   </script>
   
   <main>
@@ -27,6 +28,7 @@
   <div class="text-scroll">
     scroll<br>here
   </div>
+  <DailyMessage />
   <Cocktail />
   <div class="footer-section">
     <div class="first">
