@@ -23,6 +23,8 @@
 	"dependencies": {
 		"@react-three/drei": "^9.121.5",
 		"@react-three/fiber": "^8.17.14",
+		"@sveltejs/adapter-node": "^5.2.12",
+		"@sveltejs/adapter-static": "^3.0.8",
 		"d3": "^7.9.0",
 		"d3-array": "^3.2.4",
 		"d3-fetch": "^3.0.1",
