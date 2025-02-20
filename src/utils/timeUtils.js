@@ -1,6 +1,12 @@
 import { format, toZonedTime } from "date-fns-tz";
 import { parse } from "date-fns";
 
+// Hilfsfunktion zur Umwandlung eines Datums-Strings (dd.MM.yyyy) in ein Date-Objekt
+function parseDateString(dateString) {
+  const [day, month, year] = dateString.split(".");
+  return new Date(+year, +month - 1, +day);
+}
+
 // ✅ Funktion `computeTimeLeft` richtig exportieren
 export function computeTimeLeft(entry, dataset) {
   if (!entry?.timeZone) return null;
@@ -75,7 +81,6 @@ export function computeTimeLeft(entry, dataset) {
   return null;
 }
 
-// ✅ Sicherstellen, dass die Funktionen exportiert werden
 export function findCurrentEntry(dataset) {
   if (!dataset || dataset.length === 0) return null;
 
