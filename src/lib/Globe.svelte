@@ -258,6 +258,10 @@
   });
 </script>
 
+
+
+<div bind:this={container}></div>
+
 <style>
   /* Container füllt 100% in Breite/Höhe, 
      aber die HÖHE legt das Eltern-Element fest (z.B. 70vh) */
@@ -266,5 +270,3 @@
     height: 100%;
   }
 </style>
-
-<div bind:this={container}></div>
