@@ -88,7 +88,7 @@
     scene.background = new THREE.Color(0x000106);
 
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    camera.position.z = 3;
+    camera.position.z = 1.8;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
