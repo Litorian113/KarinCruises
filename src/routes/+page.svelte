@@ -201,6 +201,18 @@
     line-height: 0.9;
     opacity: 0.7;
   }
+
+  .bottom-section {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0px;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000106;
+
+    }
 }
 
   </style>
