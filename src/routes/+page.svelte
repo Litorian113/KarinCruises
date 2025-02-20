@@ -9,6 +9,7 @@
   
   <main>
     <Nav />
+    
     <div class="wrapper">
     <Globe />
   </div>
