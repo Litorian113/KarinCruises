@@ -5,7 +5,7 @@
   import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
   import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
   import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-
+  
   import { data } from "/src/data/routeData.js";
 
   let container;           // Referenz auf das <div> im Template
@@ -52,11 +52,9 @@
   function slerpVec3(a, b, t) {
     let dot = a.dot(b);
     dot = Math.min(Math.max(dot, -1), 1);
-
     const theta = Math.acos(dot) * t;
     const relative = b.clone().sub(a.clone().multiplyScalar(dot));
     relative.normalize();
-
     return a.clone().multiplyScalar(Math.cos(theta))
              .add(relative.multiplyScalar(Math.sin(theta)));
   }
@@ -67,22 +65,69 @@
     const rA = startPos.length();
     const rB = endPos.length();
     const avgRadius = (rA + rB) / 2;
-
     const arcPoints = [];
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       let v = slerpVec3(vStart, vEnd, t);
-
       const arcFactor = Math.sin(Math.PI * t);
       const addedHeight = extraHeight * arcFactor;
       v.multiplyScalar(avgRadius + addedHeight);
-
       arcPoints.push(v);
     }
     return arcPoints;
   }
 
-  onMount(() => {
+  // Funktion, um ein Text-Sprite zu erstellen
+  function createTextSprite(message, parameters = {}) {
+    const fontface        = parameters.fontface        || "Space Grotesk";
+    const fontsize        = parameters.fontsize        || 50;
+    const textColor       = parameters.textColor       || "rgba(255, 255, 255, 1.0)";
+    const borderThickness = parameters.borderThickness || 4;
+    const borderColor     = parameters.borderColor     || { r: 0, g: 0, b: 0, a: 1.0 };
+    const backgroundColor = parameters.backgroundColor || { r: 0, g: 0, b: 0, a: 0 };
+    const scaleFactor     = parameters.scaleFactor     || 0.04; // Faktor für die Sprite-Größe
+
+    // Canvas anlegen und 2D-Kontext holen
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    // Schriftmaße berechnen
+    context.font = fontsize + "px " + fontface;
+    const metrics = context.measureText(message);
+    const textWidth = metrics.width;
+
+    // Canvas-Größe entsprechend anpassen
+    canvas.width  = textWidth + borderThickness * 2;
+    canvas.height = fontsize * 1.4 + borderThickness * 2;
+
+    // Hintergrund (optional transparent)
+    context.fillStyle = `rgba(${backgroundColor.r}, ${backgroundColor.g}, ${backgroundColor.b}, ${backgroundColor.a})`;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Text zeichnen
+    context.font = fontsize + "px " + fontface;
+    context.fillStyle = textColor;
+    context.fillText(message, borderThickness, fontsize + borderThickness);
+
+    // Aus Canvas eine Texture erstellen
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    // Sprite-Material und Sprite erzeugen
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMaterial);
+
+    // Sprite skalieren
+    sprite.scale.set(scaleFactor * (canvas.width / canvas.height), scaleFactor, 1);
+
+    return sprite;
+  }
+
+  onMount(async () => {
+    // Warte, bis der Font "Space Grotesk" geladen ist,
+    // sodass er beim Rendern des Canvas verfügbar ist.
+    await document.fonts.load('24px "Space Grotesk"');
+
     // Szene, Kamera, Renderer
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000106);
@@ -101,9 +146,9 @@
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(100, 100), // placeholder, wird im handleResize gesetzt
-      1.5,
-      0.4,
-      0.85
+      1,  // strength (Intensität)
+      0.4,  // radius
+      0.85  // threshold (ab wann es "blüht")
     );
     composer.addPass(bloomPass);
 
@@ -223,6 +268,44 @@
       }
     }
 
+    // Hier fügen wir die Logik für die Labels hinzu:
+    // Filtere alle Hafen-Einträge (ohne "atSea")
+    const portData = sortedData.filter(entry => !entry.atSea);
+
+    // Bestimme den letzten Hafen bis heute (aktueller Hafen)
+    const pastPorts = portData.filter(entry => isPastOrToday(entry.date));
+    const currentPortData = pastPorts.length > 0 ? pastPorts[pastPorts.length - 1] : null;
+
+    // Bestimme den ersten Hafen nach heute (nächster Hafen)
+    const upcomingPorts = portData.filter(entry => !isPastOrToday(entry.date));
+    const nextPortData = upcomingPorts.length > 0 ? upcomingPorts[0] : null;
+
+    if (currentPortData) {
+  const currentPos = latLonToCartesian(currentPortData.latitude, currentPortData.longitude, 1.02);
+  const currentLabel = createTextSprite(currentPortData.port, {
+    fontsize: 40,
+    textColor: "rgba(255,255,0,1.0)", // Gelb
+    scaleFactor: 0.03
+  });
+  currentLabel.position.copy(currentPos).add(new THREE.Vector3(0, 0.03, 0));
+  currentLabel.renderOrder = 999;
+  // currentLabel.material.depthTest = false;
+  scene.add(currentLabel);
+}
+
+if (nextPortData) {
+  const nextPos = latLonToCartesian(nextPortData.latitude, nextPortData.longitude, 1.02);
+  const nextLabel = createTextSprite(nextPortData.port, {
+    fontsize: 40,
+    textColor: "rgba(255,255,255,1.0)",
+    scaleFactor: 0.03
+  });
+  nextLabel.position.copy(nextPos).add(new THREE.Vector3(0, 0.03, 0));
+  nextLabel.renderOrder = 999;
+  // nextLabel.material.depthTest = false;
+  scene.add(nextLabel);
+}
+
     // Klick toggelt autoRotate
     container.addEventListener("click", () => {
       autoRotate = !autoRotate;
@@ -258,13 +341,24 @@
   });
 </script>
 
-
-
 <div bind:this={container}></div>
 
 <style>
+  @font-face {
+    font-family: "Space Grotesk";
+    src: url("/fonts/Spacegrotesk/SpaceGrotesk-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Space Grotesk";
+    src: url("/fonts/Spacegrotesk/SpaceGrotesk-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+  }
   /* Container füllt 100% in Breite/Höhe, 
-     aber die HÖHE legt das Eltern-Element fest (z.B. 70vh) */
+     aber die HÖHE legt das Eltern-Element fest (z. B. 70vh) */
   div {
     width: 100%;
     height: 100%;

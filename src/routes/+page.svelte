@@ -126,7 +126,9 @@
       width: 100vw;
       height: 55vh;
       background-color: #000106;
+
     }
+
 
 .cardstyle {
   display: flex;
@@ -134,10 +136,22 @@
 
 }
 
-    .wrapper {
-      height: 55vh;
-      width: 100vw;
-    }
+.wrapper {
+  height: 55vh;
+  width: 100vw;
+  position: relative;
+}
+
+.wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px; /* Höhe des Übergangs */
+  background: linear-gradient(to bottom, rgba(0, 1, 6, 0) 0%, rgba(0, 1, 6, 1) 100%);
+  pointer-events: none;
+}
 
 .text-area {
   display: flex;
