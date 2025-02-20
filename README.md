@@ -1,38 +1,55 @@
-# sv
+# SvelteKit Travel Globe Project
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+## Overview
+This project is a **SvelteKit-based web application** that visualizes a traveler's journey using a **3D globe powered by Three.js**. The application updates daily to show the current location and the next travel destination. Additional functionalities include displaying local time, travel schedules, and AI-generated travel tips.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+### 🌍 Interactive 3D Globe
+- Displays the traveler's current location with a **glowing yellow dot**.
+- Shows future travel destinations as **white dots**.
+- Connects the current location to the next destination with a **line**.
+
+### 📌 Info Cards
+1. **Current Location Info Card**
+   - Displays the **port name**.
+   - Shows **arrival and departure times**.
+   
+2. **Time & Travel Info Card**
+   - Displays **current local time**.
+   - If docked at a port, shows **time spent at the location**.
+   - If en route, shows **time remaining until next arrival**.
+
+### 📝 AI-Powered Travel Guide
+- A **textarea input** allows users to generate travel recommendations.
+- Utilizes the **ChatGPT API** to suggest sightseeing spots and great bars **based on the current or upcoming port**.
+
+### 📲 Morning Push Notifications
+- Sends a **daily notification** with:
+  - **Current location**
+  - **Local time**
+  - **Essential travel updates**
+
+## Installation
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
+npm install --legacy-peer-deps
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## TODOs
+- [ ] **Add labels to the dots on the globe** with port names.
+- [ ] **Center the content** within the info cards.
+- [ ] **Add a favicon** to enhance branding.
+- [ ] Improve ChatGPT message accuracy by **syncing it with the current time**.
+- [ ] Introduce a new info card for the **next upcoming port**.
+- [ ] **Remove unnecessary margin** between info cards.
+- [ ] Implement a **webhook for push notifications** with summarized key data.
+- [ ] Adjust the **globe brightness** for better visibility.
+- [ ] Fix bug: **"Time to Arrival" incorrectly calculates if the ship departs on the same day**, as the calculation only updates when the local time transitions to the next day.
 
-To create a production version of your app:
+## Contributing
+Pull requests and feature suggestions are welcome! If you find any issues, feel free to report them.
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## License
+This project is licensed under the **MIT License**.
