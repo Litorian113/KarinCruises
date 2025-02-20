@@ -1,8 +1,9 @@
 <script>
     import { onMount } from "svelte";
-    import { getCurrentLocation } from "$lib/getCurrentLocation.js";
+    import { findCurrentEntry } from "../utils/timeUtils.js"; // ✅ Holt den aktuellen Hafen korrekt
     import { getDailyMessage } from "$lib/openai.js";
     import { writable } from "svelte/store";
+    import { data } from "../data/routeData.js";
 
     let message = writable(""); // Für den animierten Text
     let fullMessage = ""; // Speichert die gesamte Nachricht vor der Animation
@@ -11,13 +12,8 @@
 
     async function fetchMessage() {
         loading = true;
-        locationData = getCurrentLocation();
-        fullMessage = await getDailyMessage(
-            locationData.location,
-            locationData.atSea,
-            locationData.timeZone,
-            new Date().toLocaleDateString("de-DE")
-        );
+        locationData = findCurrentEntry(data); // ✅ Jetzt die korrekte Zeitlogik!
+        fullMessage = await getDailyMessage();
 
         message.set(""); // Startet die Animation mit leerem Text
         typewriterEffect(fullMessage);
@@ -67,7 +63,7 @@
     p {
         font-size: 1.2rem;
         color: #f8f9fa;
-        white-space: pre-wrap; /* Zeilenumbrüche beibehalten */
+        white-space: pre-wrap;
     }
 
     .blinking-cursor {
