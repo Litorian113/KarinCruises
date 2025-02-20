@@ -58,6 +58,32 @@
     });
 </script>
     
+
+    
+<div class="cardContainer">
+  <div class="card" bind:this={cardElement} class:in-view={inView}>
+    <img src="/wheel.png" alt="Wheel icon" class="icon" />
+    <p>Karin today you are at:</p>
+    {#if !currentEntry}
+      <div class="port">No data for today</div>
+    {:else if currentEntry.atSea}
+      <div class="port">Sea</div>
+    {:else}
+      <div class="port">{portName}</div>
+      <div class="row">
+        <div class="item">Arrival:</div>
+        <div class="item">{arrival}</div>
+      </div>
+      <div class="row">
+        <div>Departure:</div>
+        <div>{departure}</div>
+      </div>
+    {/if}
+  </div>
+</div>
+
+
+
 <style>
   .cardContainer {
     position: relative;
@@ -119,25 +145,3 @@
       gap: 20px;
   }
 </style>
-    
-<div class="cardContainer">
-  <div class="card" bind:this={cardElement} class:in-view={inView}>
-    <img src="/wheel.png" alt="Wheel icon" class="icon" />
-    <p>Karin today you are at:</p>
-    {#if !currentEntry}
-      <div class="port">No data for today</div>
-    {:else if currentEntry.atSea}
-      <div class="port">Sea</div>
-    {:else}
-      <div class="port">{portName}</div>
-      <div class="row">
-        <div class="item">Arrival:</div>
-        <div class="item">{arrival}</div>
-      </div>
-      <div class="row">
-        <div>Departure:</div>
-        <div>{departure}</div>
-      </div>
-    {/if}
-  </div>
-</div>
