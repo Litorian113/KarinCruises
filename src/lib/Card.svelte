@@ -65,7 +65,6 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: -80px;
   }
   
   .card {
