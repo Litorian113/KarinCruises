@@ -28,12 +28,16 @@
   <div class="text-scroll">
     scroll<br>here
   </div>
+  <div class="text-area">
+  <div class="text-area-inner">
   <DailyMessage />
+  </div>
+</div>
   <Cocktail />
   <div class="footer-section">
     <div class="first">
-  <p class="sign">designed by Franz Anhäupl</p>
-  <p class="sign">developed by Franz Anhäupl</p>
+  <p class="sign">designed by <a href="https://www.instagram.com/fxma_photography_videography/" target="_blank" rel="noopener noreferrer" class="underline-link">Franz Anhäupl</a></p>
+  <p class="sign">developed by <a href="https://github.com/Litorian113" target="_blank" rel="noopener noreferrer" class="underline-link">Franz Anhäupl</a></p>
 </div>
 <div class="second">
   <p class="sign">for his hardworking babe ❤️</p>
@@ -42,6 +46,11 @@
   </main>
 
   <style>
+
+    a {
+      color: white;
+      cursor:pointer;
+    }
   
 
 @font-face {
@@ -69,7 +78,6 @@
   width: 100vw;
   align-items: center;
   padding-bottom: 60px;
-  margin-top: -60px;
 }
   
 .text-rotate {
@@ -115,7 +123,7 @@
       flex-wrap: wrap;
       justify-content: space-evenly;
       width: 100vw;
-      height: 100vh;
+      height: 55vh;
       background-color: #000106;
     }
 
@@ -130,6 +138,34 @@
       width: 100vw;
     }
 
+.text-area {
+  display: flex;
+  width: 100%;
+  height: 40vh;
+  justify-content: center;
+}
+.text-area-inner {
+  width: 50%;
+}
+
+@media (max-width: 768px) {
+  .text-area-inner {
+    width: 100%;
+    height: 50vh;
+  }
+  .bottom-section {
+    height: 100vh;
+  }
+  .footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100vw;
+  align-items: center;
+  padding-bottom: 60px;
+  margin-top: -60px;
+  }
+}
 
   </style>
   

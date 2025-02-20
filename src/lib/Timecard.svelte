@@ -125,6 +125,29 @@
     });
   </script>
     
+  
+    
+  <div class="cardContainer">
+    <div class="card" bind:this={cardElement} class:in-view={inView}>
+      <img src="/clock.png" alt="clock icon" class="icon" />
+      <p id="lessgap">Current local time:</p>
+      <div class="big-time">{localTime}</div>
+      {#if timeLeft}
+      <div class="abschnitt">
+      <div>
+        <p class="time">{timeLeft.label}:</p>
+        </div>
+        <div>
+             <p class="time">{timeLeft.diff}</p>
+            </div>
+        </div>
+      {:else}
+        <p>No arrival upcoming or already in port.</p>
+      {/if}
+    </div>
+  </div>
+
+
   <style>
     .cardContainer {
       position: relative;
@@ -190,24 +213,4 @@
         gap: 20px;
     }
   </style>
-    
-  <div class="cardContainer">
-    <div class="card" bind:this={cardElement} class:in-view={inView}>
-      <img src="/clock.png" alt="clock icon" class="icon" />
-      <p id="lessgap">Current local time:</p>
-      <div class="big-time">{localTime}</div>
-      {#if timeLeft}
-      <div class="abschnitt">
-      <div>
-        <p class="time">{timeLeft.label}:</p>
-        </div>
-        <div>
-             <p class="time">{timeLeft.diff}</p>
-            </div>
-        </div>
-      {:else}
-        <p>No arrival upcoming or already in port.</p>
-      {/if}
-    </div>
-  </div>
   
