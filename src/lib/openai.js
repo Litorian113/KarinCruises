@@ -30,10 +30,15 @@ export async function getDailyMessage() {
 
     const { date, port, atSea } = todayStop;
 
+    let nicknames = ["Nightowly", "my Laopo", "babe", "little princess"];
+    let randomNickname = nicknames[Math.floor(Math.random() * nicknames.length)];
+    let affectionateGreetings = ["sunshine", "darling", "love", "beautiful", "gorgeous"];
+    let randomGreeting = affectionateGreetings[Math.floor(Math.random() * affectionateGreetings.length)];
+    
     let prompt = atSea
-        ? `Today is ${date}, and my girlfriend is at sea. Send her a smooth and confident message about enjoying the ocean breeze, the beauty of open waters, and a little seafarer wisdom. Keep it under 250 characters, cool and engaging.`
-        : `Today is ${date}, and my girlfriend has arrived in ${port}. Greet her with a stylish welcome and suggest either a great bar, a must-visit restaurant, or a cool sight to check out. Keep it under 250 characters—charming, effortless, and a bit of rizz.`;
-
+        ? `Today is ${date}, and my ${randomNickname} is at sea. Send her a smooth and confident message about enjoying the ocean breeze, the beauty of open waters, and a little seafarer wisdom. Keep it under 350 characters—cool, engaging, and full of warmth.`
+        : `Today is ${date}, and my ${randomNickname} has arrived in ${port}. Greet her with a stylish welcome, calling her ${randomGreeting}, and suggest either a great bar, a must-visit restaurant, or a cool sight to check out. Keep it under 350 characters—charming, effortless, and full of rizz.`;
+    
     try {
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
