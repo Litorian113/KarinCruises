@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { findCurrentEntry } from "../utils/timeUtils.js"; // ✅ Nutzt jetzt die utils-Funktion!
 import { data } from "../data/routeData.js"; // Sicherstellen, dass der Pfad korrekt ist!
 
 const openai = new OpenAI({
@@ -6,23 +7,8 @@ const openai = new OpenAI({
     dangerouslyAllowBrowser: true,
 });
 
-// ✅ Funktion zur Ermittlung des heutigen Datums im richtigen Format (DD.MM.YYYY)
-function getTodayLocalDate() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    return `${day}.${month}.${year}`; // Ausgabe: DD.MM.YYYY
-}
-
-// ✅ Funktion zur Ermittlung des heutigen Stopps im Datensatz
-function findTodaysLocation() {
-    const todayFormatted = getTodayLocalDate(); // Datum im Format DD.MM.YYYY
-    return data.find(entry => entry.date === todayFormatted) || null;
-}
-
 export async function getDailyMessage() {
-    const todayStop = findTodaysLocation();
+    const todayStop = findCurrentEntry(data); // ✅ Nutzt jetzt die korrekte Zeitlogik aus `timeUtils.js`
 
     if (!todayStop) {
         return "Couldn't find today's location. Please try again later.";

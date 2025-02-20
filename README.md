@@ -38,15 +38,7 @@ npm run dev
 ```
 
 ## TODOs
-- [ ] **Add labels to the dots on the globe** with port names.
-- [ ] **Center the content** within the info cards.
-- [ ] **Add a favicon** to enhance branding.
-- [ ] Improve ChatGPT message accuracy by **syncing it with the current time**.
-- [ ] Introduce a new info card for the **next upcoming port**.
-- [ ] **Remove unnecessary margin** between info cards.
 - [ ] Implement a **webhook for push notifications** with summarized key data.
-- [ ] Adjust the **globe brightness** for better visibility.
-- [ ] Fix bug: **"Time to Arrival" incorrectly calculates if the ship departs on the same day**, as the calculation only updates when the local time transitions to the next day.
 
 ## Contributing
 Pull requests and feature suggestions are welcome! If you find any issues, feel free to report them.

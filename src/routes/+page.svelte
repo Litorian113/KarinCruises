@@ -9,6 +9,7 @@
   
   <main>
     <Nav />
+    
     <div class="wrapper">
     <Globe />
   </div>
@@ -202,6 +203,8 @@
     opacity: 0.7;
   }
 
+}
+@media (max-width: 500px) {
   .bottom-section {
       display: flex;
       flex-direction: row;
@@ -213,7 +216,7 @@
       background-color: #000106;
 
     }
-}
+  }
 
   </style>
   
