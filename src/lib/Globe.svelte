@@ -7,11 +7,12 @@
   import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
   
   import { data } from "/src/data/routeData.js";
+  import { computeTimeLeft, findCurrentEntry, getLocalTime, timeUntilNextDay, msToDiffString } from "../utils/timeUtils.js";
 
   let container;           // Referenz auf das <div> im Template
   let autoRotate = true;
   
-  // Datum
+  // Lokales Datum – wird weiterhin für gewisse Darstellungen genutzt
   let today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -20,6 +21,7 @@
     return new Date(+year, +month - 1, +day);
   }
 
+  // Diese lokalen Vergleichsfunktionen bleiben bestehen (z. B. für Marker-Farben)
   function isPastOrToday(dateString) {
     const d = parseDDMMYYYY(dateString);
     d.setHours(0, 0, 0, 0);
@@ -268,43 +270,65 @@
       }
     }
 
-    // Hier fügen wir die Logik für die Labels hinzu:
-    // Filtere alle Hafen-Einträge (ohne "atSea")
+    // ─────────────────────────────────────────────
+    // Neue Logik für die Ermittlung von aktuellem und nächstem Hafen
+    // unter Berücksichtigung der Zeitzone des Hafens
+    // ─────────────────────────────────────────────
     const portData = sortedData.filter(entry => !entry.atSea);
 
-    // Bestimme den letzten Hafen bis heute (aktueller Hafen)
-    const pastPorts = portData.filter(entry => isPastOrToday(entry.date));
-    const currentPortData = pastPorts.length > 0 ? pastPorts[pastPorts.length - 1] : null;
+    // Aktuellen Hafen ermitteln (basierend auf arrival/departure & Zeitzone)
+    const currentPortData = findCurrentEntry(portData);
+    
+    // Hilfsfunktion, um ein Datum im Format dd.MM.yyyy zu parsen
+    function parseDateString(dateString) {
+      const [day, month, year] = dateString.split(".");
+      return new Date(+year, +month - 1, +day);
+    }
 
-    // Bestimme den ersten Hafen nach heute (nächster Hafen)
-    const upcomingPorts = portData.filter(entry => !isPastOrToday(entry.date));
-    const nextPortData = upcomingPorts.length > 0 ? upcomingPorts[0] : null;
-
+    let nextPortData = null;
     if (currentPortData) {
-  const currentPos = latLonToCartesian(currentPortData.latitude, currentPortData.longitude, 1.02);
-  const currentLabel = createTextSprite(currentPortData.port, {
-    fontsize: 40,
-    textColor: "rgba(255,255,0,1.0)", // Gelb
-    scaleFactor: 0.03
-  });
-  currentLabel.position.copy(currentPos).add(new THREE.Vector3(0, 0.03, 0));
-  currentLabel.renderOrder = 999;
-  // currentLabel.material.depthTest = false;
-  scene.add(currentLabel);
-}
+      const currentDate = parseDateString(currentPortData.date);
+      const futurePorts = portData.filter(entry => parseDateString(entry.date) > currentDate);
+      futurePorts.sort((a, b) => parseDateString(a.date) - parseDateString(b.date));
+      nextPortData = futurePorts[0] ?? null;
+    } else {
+      nextPortData = portData[0] ?? null;
+    }
 
-if (nextPortData) {
-  const nextPos = latLonToCartesian(nextPortData.latitude, nextPortData.longitude, 1.02);
-  const nextLabel = createTextSprite(nextPortData.port, {
-    fontsize: 40,
-    textColor: "rgba(255,255,255,1.0)",
-    scaleFactor: 0.03
-  });
-  nextLabel.position.copy(nextPos).add(new THREE.Vector3(0, 0.03, 0));
-  nextLabel.renderOrder = 999;
-  // nextLabel.material.depthTest = false;
-  scene.add(nextLabel);
-}
+    // Optional: Ausgabe der Zeitinformation (z. B. verbleibende Zeit bis Abfahrt/Ankunft)
+    if (currentPortData) {
+      const timeLeftInfo = computeTimeLeft(currentPortData, sortedData);
+      console.log("Zeitinformation für aktuellen Hafen:", timeLeftInfo);
+    }
+    // ─────────────────────────────────────────────
+
+    // Label für den aktuellen Hafen
+    if (currentPortData) {
+      const currentPos = latLonToCartesian(currentPortData.latitude, currentPortData.longitude, 1.02);
+      const currentLabel = createTextSprite(currentPortData.port, {
+        fontsize: 40,
+        textColor: "rgba(255,255,0,1.0)", // Gelb
+        scaleFactor: 0.03
+      });
+      currentLabel.position.copy(currentPos).add(new THREE.Vector3(0, 0.03, 0));
+      currentLabel.renderOrder = 999;
+      // currentLabel.material.depthTest = false;
+      scene.add(currentLabel);
+    }
+
+    // Label für den nächsten Hafen
+    if (nextPortData) {
+      const nextPos = latLonToCartesian(nextPortData.latitude, nextPortData.longitude, 1.02);
+      const nextLabel = createTextSprite(nextPortData.port, {
+        fontsize: 40,
+        textColor: "rgba(255,255,255,1.0)",
+        scaleFactor: 0.03
+      });
+      nextLabel.position.copy(nextPos).add(new THREE.Vector3(0, 0.03, 0));
+      nextLabel.renderOrder = 999;
+      // nextLabel.material.depthTest = false;
+      scene.add(nextLabel);
+    }
 
     // Klick toggelt autoRotate
     container.addEventListener("click", () => {
