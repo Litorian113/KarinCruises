@@ -83,7 +83,7 @@
 .text-rotate {
   position: absolute;
     top: 30vh;
-    left: 1rem;
+    left: 17rem;
     color: white;
     font-size: 0.8rem;
     line-height: 0.9;
@@ -94,7 +94,7 @@
   .text-scroll {
     position: absolute;
     top: 65vh;
-    left: 1rem;
+    left: 17rem;
     color: white;
     font-size: 0.8rem;
     line-height: 0.9;
@@ -121,7 +121,8 @@
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      justify-content: space-evenly;
+      justify-content: center;
+      gap: 135px;
       width: 100vw;
       height: 55vh;
       background-color: #000106;
@@ -164,6 +165,27 @@
   align-items: center;
   padding-bottom: 60px;
   margin-top: -60px;
+  }
+
+  .text-rotate {
+  position: absolute;
+    top: 30vh;
+    left: 1rem;
+    color: white;
+    font-size: 0.8rem;
+    line-height: 0.9;
+    opacity: 0.7;
+  }
+
+  /* Text auf 55% VH */
+  .text-scroll {
+    position: absolute;
+    top: 65vh;
+    left: 1rem;
+    color: white;
+    font-size: 0.8rem;
+    line-height: 0.9;
+    opacity: 0.7;
   }
 }
 

@@ -186,11 +186,11 @@
 
     function drawBorders(geojson) {
       const borderMaterial = new THREE.LineBasicMaterial({
-        color: 0x172039,
+        color: 0x01859C,
         linewidth: 2,
       });
       const glowMaterial = new THREE.MeshBasicMaterial({
-        color: 0x172039,
+        color: 0x01859C,
         transparent: true,
         opacity: 1,
         side: THREE.DoubleSide,
